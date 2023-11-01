@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# In[1]:
 
 
 #Author : Dipin
@@ -19,7 +19,7 @@ def main():
     df, frames_with_classid_error, box_classid_error, classid_error_statements = class_error(df)
     df, frames_with_duplicates, duplicate_statements = duplicates(df)
     df, sentences_iou, row_with_iou_0 = iou(df)
-    total_individuals_area,  unique_individuals_area, frames_unique_entries_area, total_individuals_area, statements_area = area_analysis(df)
+    total_individuals_area,  unique_individuals_area, frames_unique_entries_area, statements_area = area_analysis(df)
     filtered_disappearance_statements = disappearing_boxes(df, frames_with_classid_error, frames_with_duplicates)
     plot1(df, input_directory, csv_file_name)
     create_individual_plots(df, unique_individuals_area, total_individuals_area, input_directory, csv_file_name)
@@ -44,6 +44,22 @@ def main():
     
 
 def process_csv(file_path):
+    
+    """
+    Reads the csv file and changes it into a dataframe.
+    Args:
+        file path: Location of the csv
+        
+    Return:
+        df_in: data frame containing details of the annotations
+        unique_frames_count : total no of frames in the annotation
+        total_individuals: total no of ids
+        unique_individuals: excluding drones and classid errors
+        csv_file_name: Name of the file
+        input_directory: file path
+        
+    """
+    
     # Define the column headers
     headers = ['frame', 'classid', 'id', 'x1', 'y1', 'width', 'height', 'a', 'b', 'c', 'd']
     # Read the CSV file into a DataFrame and assign the headers
@@ -65,6 +81,20 @@ def process_csv(file_path):
     
 #find classid 
 def class_error(df_in):
+    """
+    Identifies the classid error and creates column in the csv
+    
+    Args:
+        df_in: data frame of the annotation
+        
+    Return:
+        df_in: Updated data frame
+        frames_with_classid_error: Frames that has class error
+        box_classid_error: boundind boxes with class error
+        classid_error_statements : Statement to be printed in the txt file
+        
+    """
+    
     # Create a new column 'classid_error' and initialize it with 0
     df_in['classid_error'] = 0
 
@@ -111,6 +141,19 @@ def class_error(df_in):
 
     #Finding duplicate frames
 def duplicates(df_in):
+    
+    """
+    Identifies the duplicates in each frame
+
+    Args:
+        df_in: data frame of the annotation
+        
+    Return:
+        df_in: Updated data frame
+        frames_with_duplicates: Frames that has duplicates error
+        duplicate_statements : Statement to be printed in the txt file
+
+    """
     # Create a new column 'duplicates' indicating if a row is a duplicate
     df_in['duplicates'] = df_in.groupby(['frame', 'classid'])['id'].transform(lambda x: x.duplicated(keep=False).astype(int))
     duplicate_statements = []
@@ -136,6 +179,19 @@ def duplicates(df_in):
     return df_in, frames_with_duplicates, duplicate_statements
 
 def iou(df_in):    
+    """
+    Calculates the iou value between each frame of an individual and finds the frame that has 0 IOU values
+
+    Args:
+        df_in: data frame of the annotation
+
+    Return:
+        df_in: Updated data frame
+        row_with_iou_0: Frames that has IOU = 0 with the previous frame
+        sentences_iou : Statement to be printed in the txt file 
+    
+    
+    """
 
     #intersection over union
      # Sort the DataFrame by 'classid', 'id', and 'frame' in ascending order
@@ -222,6 +278,19 @@ def iou(df_in):
 
 
 def disappearing_boxes(df_in, frames_with_classid_error, frames_with_duplicates):
+    """
+    Finds the frame if an individual disappears and reappeares
+    Args:
+        df_in: data frame of the annotation
+        frames_with_classid_error: Frames that has class error
+        frames_with_duplicates: Frames that has duplicates error
+        
+        
+    Return:
+        filtered_disappearance_statements : Statement to be printed in the txt file
+    
+    """
+    
     # Sort the DataFrame by 'id' and 'frame' in ascending order
     df_in.sort_values(by=['id', 'frame'], inplace=True)
 
@@ -258,6 +327,21 @@ def disappearing_boxes(df_in, frames_with_classid_error, frames_with_duplicates)
 
 
 def area_analysis(df_in):
+    """
+    Filtering out boxes with area above 4000
+    
+     Args:
+        df_in: data frame of the annotation
+       
+     Return:
+         total_individuals_area: number of individuals above 4000
+         unique_individuals_area: dataframe of individuals above 4000
+         frames_unique_entries_area: Frames with individuals with area above 4000
+         statements_area: statement to be printed in the text
+
+        
+    """
+    
     # Filter rows where 'area' is greater than 4000
     rows_with_high_area = df_in[df_in['area'] > 4000]
     statements_area = []
@@ -313,11 +397,23 @@ def area_analysis(df_in):
     else:
         print("No unique entries found above threshold.")
 
-    return total_individuals_area,  unique_individuals_area, frames_unique_entries_area, total_individuals_area, statements_area
+    return total_individuals_area,  unique_individuals_area, frames_unique_entries_area, statements_area
 
 
 
 def plot1(df_in, input_directory, csv_file_name):
+    """
+    Plot scatter plot  with area in the x axis and no of bounding boxes in the y axis
+    
+    
+     Args:
+        df_in: data frame of the annotation
+        csv_file_name: Name of the file
+        input_directory: file path
+        
+     
+    """
+    
     def calculate_percentile(df_in, column, percentile):
         df_in = df_in.sort_values(by=column)
         index = (len(df_in) - 1) * percentile
@@ -402,6 +498,9 @@ def plot1(df_in, input_directory, csv_file_name):
 
 
     #area vs aspect ratio
+    """
+    Plot graph with aspect ratio in the x axis nad area in the y axis of each row
+    """
     df_inc=df_in.copy()
     # Calculate the ratio of short side to long side (width/height)
     df_inc['short_side'] = df_inc[['width', 'height']].min(axis=1)
@@ -430,6 +529,19 @@ def plot1(df_in, input_directory, csv_file_name):
     
 # Function to plot graphs for individuals above 4000
 def create_individual_plots(df_in, unique_individuals_area, total_individuals_area, input_directory, csv_file_name):
+    
+    """
+    Create plots of frame vs area of individuals who has area above 4000
+    
+     Args:
+        df_in: data frame of the annotation
+        unique_individuals_area: dataframe of individuals above 4000
+        total_individuals_area: number of individuals above 4000
+        csv_file_name: Name of the file
+        input_directory: file path
+    
+    """
+    
     if 50> total_individuals_area > 0:
         # Create a single figure to contain all plots
         fig, axes = plt.subplots(len(unique_individuals_area), 1, figsize=(20, 8 * len(unique_individuals_area)))
@@ -472,6 +584,17 @@ def create_individual_plots(df_in, unique_individuals_area, total_individuals_ar
         plt.show()
 
 def save_dataframe_to_csv(df_in, csv_file_path):
+    
+    """
+    Saves the updates csv file
+    
+    Args:
+        df_in: data frame of the annotation
+        csv_file_path
+        
+    
+    
+    """
     # Extract the directory path from the input CSV file's path
     output_directory = os.path.dirname(csv_file_path)
     df_in.sort_values(by='frame', inplace=True)
@@ -505,6 +628,12 @@ def text_save(
     duplicate_statements,
     classid_error_statements 
 ):
+    
+    
+    """
+    Saves the errors in the text file        
+    
+    """
     # Define the text file name with the desired format
     text_file_name = os.path.join(input_directory, f'Analysed_{csv_file_name}.txt')
 
@@ -529,7 +658,7 @@ def text_save(
                 file.write("\n")  # Add a line gap
 
             if len(frames_with_duplicates) > 0:
-                file.write("Frames with duplicates:(Class:ID)\n")
+                file.write("Frames with duplicates:\n")
                 file.write(','.join(map(str, frames_with_duplicates)) + '\n')
                 file.write("Frame = (Class:ID) \n")
                 for statement in duplicate_statements:

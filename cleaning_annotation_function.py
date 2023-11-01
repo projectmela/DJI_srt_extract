@@ -19,6 +19,18 @@ def main():
     save_dataframe_to_csv(df, file_path)
 
 def process_csv(file_path):
+    
+    """
+    Reads the csv file and changes it into a dataframe.
+    Args:
+        file path: Location of the csv
+        
+    Return:
+        df_in: data frame containing details of the annotations
+ 
+        
+    """
+    
     # Define the column headers
     headers = ['frame', 'classid', 'id', 'x1', 'y1', 'width', 'height', 'a', 'b', 'c', 'd']
 
@@ -33,6 +45,17 @@ def process_csv(file_path):
 
 #find classid 
 def class_error(df):
+    """
+    Takes the data frame and cleans the class error by comparing the iou value of the the error box with the one in the
+    prevoius frame
+  Args:
+      df_in: data frame of the annotation
+      
+    Return:
+        df_in: updated data frame
+    
+    """
+    
     # Create a new column 'classid_error' and initialize it with 0
     df['classid_error'] = 0
 
@@ -109,6 +132,17 @@ def class_error(df):
 
 #Finding duplicate frames
 def duplicates(df):
+    
+    """
+    Identifies the duplicates in each frame and cleans it using IOU value with the same individual in the previous frame
+
+    Args:
+        df_in: data frame of the annotation
+        
+    Return:
+        df_in: Updated data frame
+    """
+    
     # Create a new column 'duplicates' indicating if a row is a duplicate
     df['duplicates'] = df.groupby(['frame', 'classid'])['id'].transform(lambda x: x.duplicated(keep=False).astype(int))
     duplicate_statements = []
@@ -252,6 +286,10 @@ def duplicates(df):
     
 
 def save_dataframe_to_csv(df, input_csv_file_path):
+    
+    """
+    Saves the updated datafram as a csv 
+    """
     columns_to_drop = ['duplicates', 'duplicate_frame', 'classid_error', 'classid_error_frame', 'area']
     # Drop the specified columns
     df = df.drop(columns=columns_to_drop)
