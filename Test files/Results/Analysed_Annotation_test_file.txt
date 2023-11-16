@@ -1,0 +1,29 @@
+Frames with classid errors: 
+5
+Total no of boxes with classid error: 20
+Frame = (ID) 
+Frame 5 = (0), (2), (10), (9), (3), (7), (5), (6), (4), (1), (8)
+
+Frames with duplicates:
+5, 8
+Frame = (Class:ID) 
+Frame 5 = (-1:10), (-1:7), (-1:9), (-1:6), (-1:8), (-1:4), (-1:3), (-1:5), (-1:2)
+Frame 8 = (1:1), (0:2), (0:4)
+
+
+Out of 31 frames, no of frames with bounding box area greater than 4000: 1
+Out of 23 individuals, no of individuals with bounding box area greater than 4000: 2
+ID 9 (Class 0) = 1 frames.
+ID 6 (Class 1) = 1 frames.
+
+
+Disappearance Statements:
+ID 10 (Class 0) disappeared in frame 6 and reappeared in frame 9
+
+Intersection over union = 0:
+ID 0 (Class 0) has IOU value 0 between the frames 11 and 12
+ID 0 (Class 0) has IOU value 0 between the frames 12 and 13
+ID 1 (Class 0) has IOU value 0 between the frames 27 and 28
+ID 4 (Class 0) has IOU value 0 between the frames 7 and 8
+ID 4 (Class 0) has IOU value 0 between the frames 8 and 9
+ID 9 (Class 1) has IOU value 0 between the frames 27 and 28
