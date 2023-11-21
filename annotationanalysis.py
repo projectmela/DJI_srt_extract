@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import math
 import matplotlib.pyplot as plt
+import numpy as np
 import argparse
 
 class DataProcessor:
@@ -241,31 +242,32 @@ class DataProcessor:
         for sentence_iou in self.sentences_iou:
             print(sentence_iou)    
         
-    def areaanalysis(self):
+    def areaanalysis(self, area_threshold):
         """
-        Filtering out boxes with an area above 4000
+        Filtering out boxes with an area above area threshold
         Args:
         df: data frame of the annotation
        
          Return:
-         total_individuals_area: number of individuals above 4000
-         unique_individuals_area: dataframe of individuals above 4000
-         frames_unique_entries_area: Frames with individuals with area above 4000
+         total_individuals_area: number of individuals above area threshold
+         unique_individuals_area: dataframe of individuals above area threshold
+         frames_unique_entries_area: Frames with individuals with area above area threshold
          statements_area: statement to be printed in the text
 
         """
 
     
-         # Filter rows where 'area' is greater than 4000
-        rows_with_high_area = self.df[self.df['area'] > 4000]
+         # Filter rows where 'area' is greater than area_ hreshold
+        rows_with_high_area = self.df[self.df['area'] > area_threshold]
         self.statements_area = []
+        self.area_threshold = area_threshold
         #Removing classid error and drone(ID=2)
         frames_unique_high_area = rows_with_high_area[(rows_with_high_area['classid'] != -1) & (rows_with_high_area['classid'] != 2)]
         self.frames_unique_entries_area = frames_unique_high_area['frame'].nunique()
 
         
         # Print the number of unique entries
-        print("Number of unique frames with area above 4000:", self.frames_unique_entries_area)
+        print("Number of unique frames with area above area threshold:", self.frames_unique_entries_area)
         
         # Get the unique combination of 'classid' and 'id' values for all individuals
         unique_individuals_area = rows_with_high_area[['classid', 'id']].drop_duplicates()
@@ -282,24 +284,24 @@ class DataProcessor:
              # Create an empty DataFrame to store the results
             df_area = unique_individuals_area.copy()
             
-            # Function to count frames where area > 4000 for an individual
-            def count_frames_above_4000(classid, individual_id):
+            # Function to count frames where area > area threshold for an individual
+            def count_frames_above_area_threshold(classid, individual_id):
                 filtered_df = self.df[(self.df['classid'] == classid) & (self.df['id'] == individual_id)]
-                frames_above_4000 = len(filtered_df[filtered_df['area'] > 4000])
-                return frames_above_4000
+                frames_above_area_threshold = len(filtered_df[filtered_df['area'] > area_threshold])
+                return frames_above_area_threshold
             
            # Apply the function to each row of df_area and store the result in a new column
-            df_area['no of frames>4000'] = df_area.apply(lambda row: count_frames_above_4000(row['classid'], row['id']), axis=1)
+            df_area['no of frames>area_threshold'] = df_area.apply(lambda row: count_frames_above_area_threshold(row['classid'], row['id']), axis=1)
 
         # Create an empty list to store the statements            
             statements_area = []
 
-            # Function to count frames where area > 4000 for an individual and generate statements
+            # Function to count frames where area > area threshold for an individual and generate statements
             def generate_statements(classid, individual_id):
                 filtered_df = self.df[(self.df['classid'] == classid) & (self.df['id'] == individual_id)]
-                frames_above_4000 = len(filtered_df[filtered_df['area'] > 4000])
+                frames_above_area_threshold = len(filtered_df[filtered_df['area'] > area_threshold])
                 # Generate the statement and append it to the list
-                statement = f"ID {individual_id} (Class {classid}) = {frames_above_4000} frames."
+                statement = f"ID {individual_id} (Class {classid}) = {frames_above_area_threshold} frames."
                 statements_area.append(statement)
 
             # Apply the function to each row of df_area
@@ -530,10 +532,9 @@ class DataProcessor:
             # Display the plot only if the user provides the --showplot option
             plt.show()
 
- 
-
     def individualplots(self):
-        """
+        
+               """
         Create plots of frame vs area for individuals with an area above 4000
         
         Args:
@@ -545,6 +546,7 @@ class DataProcessor:
     
         
         """
+        
         if 50 > self.total_individuals_area > 0:
             # Create a single figure to contain all plots
             fig, axes = plt.subplots(len(self.unique_individuals_area), 1, figsize=(20, 8 * len(self.unique_individuals_area)))
@@ -552,8 +554,11 @@ class DataProcessor:
             for i, (_, row) in enumerate(self.unique_individuals_area.iterrows()):
                 classid, individual_id = row['classid'], row['id']
 
-                # Select the current subplot
-                ax = axes[i]
+                # If there's only one subplot, axes is a single Axes object, not an array
+                if len(self.unique_individuals_area) == 1:
+                    ax = axes
+                else:
+                    ax = axes[i]
 
                 # Clear the previous plot from the subplot
                 ax.clear()
@@ -573,17 +578,17 @@ class DataProcessor:
                 # Set X axis ticks to be every 200 frames
                 ax.set_xticks(range(0, max(x) + 1, 200))
 
-
                 # Show gridlines
                 ax.grid(True)
 
             # Save the figure containing all plots with the CSV file name as part of the filename
-            image_filename_individual = os.path.join(self.input_directory, f'{self.csv_file_name}_individual_with_area_above_4000.png')
+            image_filename_individual = os.path.join(self.input_directory, f'{self.csv_file_name}_individual_with_area_above_{self.args.area}.png')
             plt.savefig(image_filename_individual, bbox_inches='tight', format='png')
 
             if self.args.showplot:
                 # Display the plot only if the user provides the --showplot option
                 plt.show()
+
 
 
     def dataframetocsv(self):
@@ -638,10 +643,11 @@ class DataProcessor:
                 file.write("\n")  # Add a line gap
 
             if self.frames_unique_entries_area > 0:
-                file.write(f"\nOut of {self.unique_frames_count} frames, no of frames with bounding box area greater than 4000: {self.frames_unique_entries_area}\n")
+                file.write(f"\nOut of {self.unique_frames_count} frames, no of frames with bounding box area greater than {self.args.area}: {self.frames_unique_entries_area}\n")
+
 
             if self.total_individuals_area > 0:
-                file.write(f"Out of {self.total_individuals} individuals, no of individuals with bounding box area greater than 4000: {self.total_individuals_area}\n")
+                file.write(f"Out of {self.total_individuals} individuals, no of individuals with bounding box area greater than {self.args.area}: {self.total_individuals_area}\n")
                 for statement in self.statements_area:
                     file.write(statement + '\n')
                 file.write("\n")  # Add a line gap
@@ -667,6 +673,7 @@ class DataProcessor:
         parser.add_argument('file_path', nargs='?', help='File path for the annotation file')
         parser.add_argument('--showplot', action='store_true', help='Flag to indicate whether to display the plot the flight')
         parser.add_argument('--noplots', action='store_true', help='Flag to skip plot generation')
+        parser.add_argument('--area', type=int, default=4000, help='Threshold area value (default is 4000)')
         args = parser.parse_args()
         self.args = parser.parse_args()# Store args for later reference
 
@@ -681,7 +688,7 @@ class DataProcessor:
             self.classerror()#identify class
             self.duplicates()#identify duplicates
             self.iou()#Checks movement of boxes between frames
-            self.areaanalysis() #checks for extreme areas
+            self.areaanalysis(args.area) #checks for extreme areas
             self.disappearingboxes()#Identify disappearing boxe
             if not args.noplots:
                 self.plotsonarea()  # Plot graph

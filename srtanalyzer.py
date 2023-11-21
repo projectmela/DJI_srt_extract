@@ -44,7 +44,7 @@ class DataProcessor:
     def sortedfolders(self):
         self.folders = sorted(glob.glob(self.session_location + '/*'))
 
-    def dataframecreation(self):
+    def dataframecreation(self, drift_thresh,  height_thresh):
         """
         Takes data from the srt files and converts them to a data frame
 
@@ -63,8 +63,7 @@ class DataProcessor:
         drift_status = []
         height_status = []
         df_dict = {}
-        drift_thresh = 5
-        height_thresh = 7
+        
 
         def extract_data_from_srt(file_path):
             """
@@ -974,6 +973,8 @@ class DataProcessor:
         parser = argparse.ArgumentParser()
         parser.add_argument('session_location', nargs='?', help='session location of the drone flight')
         parser.add_argument('--showplot', action='store_true', help='Flag to indicate whether to display the plot the flight')
+        parser.add_argument('--drift', type=float, default=5, help='Threshold drift value (default is 5)')
+        parser.add_argument('--height', type=float, default=7, help='Threshold height value (default is 7)')
         args = parser.parse_args()
         self.args = parser.parse_args()
 
@@ -984,7 +985,7 @@ class DataProcessor:
 
         if self.validfolder():#check if path is present
             self.sortedfolders()#sort the srt files
-            self.dataframecreation()#creates the data frame
+            self.dataframecreation(args.drift, args.height)#creates the data frame
             self.rearrangecolumns()#edits the names in the columns
             self.missingdata()#finds miss click errors
             self.dronenumber()#identifies first and second drones in each session
