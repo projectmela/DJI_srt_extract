@@ -207,11 +207,11 @@ class DataProcessor:
         Saves the updated DataFrame as a CSV file.
         """
         if self.df is not None:
-            # Define the columns to drop from the DataFrame
-            columns_to_drop = ['duplicates', 'classid_error', 'classid_error_frame', 'area']
+            # Columns to retain
+            columns_to_retain = ['frame', 'classid', 'id', 'x1', 'y1', 'width', 'height', 'a', 'b', 'c', 'd']
 
-            # Drop the specified columns
-            self.df = self.df.drop(columns=columns_to_drop)
+            # Retain the specified columns
+            self.df = self.df[columns_to_retain]
 
             # Extract the directory path from the input CSV file's path
             directory_path = os.path.dirname(self.file_path)
