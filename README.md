@@ -3,16 +3,16 @@
 
 These code helps in checking the validity and errors of the annotations done through the darklabel annotation software. Along with the error checking the code also provide automated correction of certain errors.
 
-
-## Appendix
-
-A test dataset is provided to help you in checking if the codes are running as intended. The test dataset contains both the files to be run and their expected outputs.
-
+# 2)Srt analyzer of drone flight
+This code helps in anlysing you drone session using the srt files created
 ## Documentation
 
-[Documentation](https://linktodocumentation)
+### Annotation ##
 
 The codes are used to detect and correct the errors that have been identified in the CSV files that have been manually annotated. One code is for the detection of the errors. The end product of running this code will be a text file with details of the error, a CSV file with some errors marked and graphs. These are explained below. The second code is for the automatic correction of some of the errors created during the annotation (duplicates, class errors) 
+
+### srt analyzer: Drone data ##
+This code analyses the srt files of the flight session and gives you output in a csv form which contains data on things like miss clicks, frame drops etc
 
 
 # **Annotation Analysis**
@@ -80,7 +80,7 @@ It was seen that some individuals showed an IOU value of 0 when compared with th
 # Area
 
 The area of the bounding box is calculated by multiplying the width and height of each bounding box. Some annotations have bounding boxes of an area above 10000. You can adjust the area measurement to analyze the annotation files by providing external commands. If not given, the area threshold will be kept at 4000. 
-
+(Type --help to see all the options)
 
 The text file produced will tell you how many frames have bounding boxes of area above 4000 and how many individuals have shown boxes above 4000.
 
@@ -94,7 +94,6 @@ ID 7 (Class 0) = 5 frames.***
 
 
 # Plots
-
 *Area scatter plot*: A scatter plot is created with area along X axis and number of boxes along Y axis. This will help in analyzing the general trend of the distribution and helps in identifying the outliers. The graph also contains mean and the 95th percentile value for the respective annotated file. This graph is created along with the text and csv file during the analysis.
 
 *Time scale of individuals over 4000:* This graph shows how the area of a particular individual varies as the frame changes. These graphs are only created for individuals whose area has gone above the 4000(can be changed) mark at any stage of the annotation. It can be used as a reference point while correcting the area(manually). 
@@ -113,6 +112,11 @@ If the distance is less than 100, the area of each duplicate (calculated by mult
 
 # Class error
 **Code for solving the error**: Here we use the intersection over union concept to solve the problem. First, the rows that are showing class errors are identified using the code above. The IOU of each bounding box with the error is compared with every individual present in the previous frame. The bounding box that has the largest IOU value from the previous frame is selected. The class and ID of this bounding box (previous frame) are copied and pasted onto the class and ID columns of the individual that is being corrected. This process is repeated for all the bounding boxes that are showing an error.
+
+# **SRT analyzer** 
+This code helps in identifies the errors and other unique data from each drone session. It creates a csv file combing all the data. 
+The information in the csv file are:
+Flight number, Global start/end time, max/min height, drift status, height variation, frame drop, miss clicks, start/end frame, relay video
 ## Installation
 
 These codes can be directly run using python once you have downloaded and installed the required files.
@@ -126,4 +130,17 @@ dependencies:
   - geopy=2.3.0 
   - opencv=4.6.0  
 ```
-    
+The codes can take more aruguments when called. Type --help to see more options.
+srtanalyzer can take
+the location of the session
+drift threshold value
+height threshold value
+
+Annotationanalysis can take
+the location of the annotated file
+area threshold value
+command to not create the graphs
+command to display graphs while running the code
+## Appendix
+
+A test dataset is provided to help you in checking if the codes are running as intended. The test dataset contains both the files to be run and their expected outputs.
