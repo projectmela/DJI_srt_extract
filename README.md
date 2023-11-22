@@ -1,10 +1,11 @@
 
 # 1)Annotation analyzer and error corrector
 
-These code helps in checking the validity and errors of the annotations done through the darklabel annotation software. Along with the error checking the code also provide automated correction of certain errors.
+This code helps in checking the validity and errors of the annotations done through the darklabel annotation software. Along with the error checking the code also provides scripts to automatically correct certain errors.
+The program is customized for the requirements of the project, however, certain parameters can be changed in the future. 
 
 # 2)Srt analyzer of drone flight
-This code helps in anlysing you drone session using the srt files created
+This code helps in anlysing the drone session using the *.srt files created with each recording session. The analysis mainly validates the overlap in the drone sessions if the relay technique is used while recording. The drones are stationary and not moving.  
 ## Documentation
 
 ### Annotation ##
